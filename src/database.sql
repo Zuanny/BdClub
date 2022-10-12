@@ -49,10 +49,11 @@ secao_ordem int ,
 secao_nome text 
 )
 
-create table aulas_usuario(
+create table usuario_aulas(
 id serial primary key ,
 id_aula_cademi int references aulas(id_aula_cademi),
 id_usuario_cademi int references usuario(id_usuario_cademi),
-id_produto_cademi int references produto(id_produto_cademi),
-acesso_em date
+acesso_em text,
+count int
 )
+

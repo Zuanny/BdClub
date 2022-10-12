@@ -2,8 +2,6 @@ const knex = require('../database')
 const { getAllProductsCademiById, getAllClassCademiById} = require ('../service/ProductCademi.js')
 
 
-
-
 const productAtualization = async (req , res) => {
   
   let product = await getAllProductsCademiById()
@@ -74,10 +72,6 @@ const classAtualization = async (req, res) => {
     return console.log(error);
   }
 }
-
-
-
-
 
 
 module.exports = {

@@ -43,7 +43,7 @@ const userAtualization = async (req , res) => {
       
     }
    
-    return res.status(200).json('Foram atualizados ',usersAtualizationList.length,' usuarios.')
+    return res.status(200).json(`Foram atualizados ${usersAtualizationList.length}`)
   } catch (error) {
     res.status(500).json({menssagem: "Erro ao salvar no banco de dados"})
   }

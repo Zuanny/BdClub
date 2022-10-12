@@ -1,6 +1,6 @@
 const axios = require('../cademi/connectionAxios')
 const utils = require('../utils')
-const ServiceDatabase = require('../service/UserDatabase')
+const ServiceDatabase = require('./Database')
 
 
 let getAllProductsCademi = async()=>{

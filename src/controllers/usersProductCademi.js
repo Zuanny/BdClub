@@ -61,6 +61,68 @@ const userProductsAtualization = async (req , res) => {
 
 }
 
+const atualizarUsuarioProdutosPorUltimoAcesso = async (req , res) => {
+  
+  let {ultimo_acesso} = req.query
+  ultimo_acesso ? ultimo_acesso : null
+  let idsUsuarioEProdutos = await ServiceUserProduct.obterTodosUsuarioProdutosDetalhes(ultimo_acesso)
+  
+  if(!idsUsuarioEProdutos){
+    return res.status(400).json({menssagem: "Erro ao capturar dados da base do Cademi"})
+  }
+  let  listaAtualizados = []
+  let atualizacao = {}
+  try {
+    for (ids of idsUsuarioEProdutos) {
+          let atualizacaoProdutos = await knex('usuario_produtos') .where({
+            id_usuario_cademi:ids.idUsuario,
+            id_produto_cademi: ids.idProduto
+          }).update({
+             porcentagem_aulas: ids.respAxios.total,
+             aulas_assistidas: ids.respAxios.assistidas,
+             aulas_completas: ids.respAxios.completas,
+          })
+
+          atualizacao.produtoComando = atualizacaoProdutos.command
+          atualizacao.produtoCount = atualizacaoProdutos.rowCount
+          atualizacao.produtoAulas = []
+          
+      for(aula of ids.respAxios.aulas){
+        let existeAulas = await knex('usuario_aulas').where({
+          id_aula_cademi:aula.item_id,
+          id_usuario_cademi:ids.idUsuario
+        }).first()
+        if(existeAulas){
+          let atualizarAula = await knex('usuario_aulas').where({
+              id_aula_cademi:aula.item_id,
+              id_usuario_cademi:ids.idUsuario
+            }).update({ acesso_em:aula.acesso_em, count: aula.ordem })
+
+            atualizacao.produtoAulas.push([atualizarAula.command, atualizarAula.rowCount ])
+        }else{
+          let atualizarAula = await knex('usuario_aulas').insert({
+            id_aula_cademi: aula.item_id,
+            id_usuario_cademi: ids.idUsuario,
+            acesso_em: aula.acesso_em,
+            count: aula.ordem
+          })
+
+          atualizacao.produtoAulas.push([atualizarAula.command, atualizarAula.rowCount ])
+        }
+      }
+      listaAtualizados.push(atualizacao)
+    }
+    return res.status(200).json(`Foram atualizadas ${listaAtualizados.length} produtos`)
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({menssagem: "Erro ao salvar no banco de dados"})
+  }
+
+}
+
+
+
 module.exports = {
-  userProductsAtualization
+  userProductsAtualization,
+  atualizarUsuarioProdutosPorUltimoAcesso
 }
