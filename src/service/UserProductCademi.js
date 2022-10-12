@@ -24,7 +24,7 @@ let getAllUserProductById = async()=>{
   }
   
 }
-
+// Chamar no controlador a lista com ids, chamar uma por uma duas funções do axios e e de inserir no banco de dados
 let obterTodosUsuarioProdutosDetalhes = async (ultimo_acesso = null) => {
   let listaIdsUsuarioProdutos = await ServiceDatabase.obterTodosIdsUsuarioProdutosPorUltimoAcesso(ultimo_acesso)
   let resposta = []
