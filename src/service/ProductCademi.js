@@ -1,5 +1,7 @@
 const axios = require('../cademi/connectionAxios')
 const utils = require('../utils')
+const ServiceDatabase = require('../service/UserDatabase')
+
 
 
 
@@ -55,8 +57,36 @@ let getAllProductsCademiById = async ()=>{
   
 }
 
+let getAllClassCademiById = async ()=>{
+
+  try {
+    let productIds = await ServiceDatabase.getAllIdCademiProduct();
+    let aulas = []
+    
+    for(itens of productIds){
+      let aula = await axios.get(`/item/lista_por_produto/${itens.id_produto_cademi}`)
+      if(aula.data.code = 200){
+        padraoAula = {
+          produtoId : productIds[0].id_produto_cademi,
+          aulas: aula.data.data.itens
+        }
+        aulas.push(padraoAula)
+
+      }
+    // console.log(aulas);
+    }
+    return aulas
+    
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+  
+}
+
 module.exports = {
   
   getAllProductsCademi,
-  getAllProductsCademiById
+  getAllProductsCademiById,
+  getAllClassCademiById
 }

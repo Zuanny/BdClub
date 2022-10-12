@@ -11,6 +11,17 @@ const getAllIdUser = async ()=>{
   }
 }
 
+const getAllIdCademiProduct = async () => {
+  try { 
+    let productId = await knex('produto').select('id_produto_cademi');
+    return productId
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
 module.exports = {
-  getAllIdUser
+  getAllIdUser,
+  getAllIdCademiProduct
 }

@@ -1,6 +1,6 @@
 const knex = require('../database')
 const axios = require('../cademi/connectionAxios')
-const { getAllProductsCademiById} = require ('../service/ProductCademi.js')
+const { getAllProductsCademiById, getAllClassCademiById} = require ('../service/ProductCademi.js')
 
 
 
@@ -43,11 +43,45 @@ const productAtualization = async (req , res) => {
 
 }
 
+const classAtualization = async (req, res) => {
+  try {
+   let allClass = await getAllClassCademiById()
+
+   let resposta = []
+   for(aula of allClass ){
+    for(itens of aula.aulas){
+      let classAtualization = await knex('aulas')
+      .insert({
+        id_aula_cademi: itens.id,
+        id_produto_cademi: aula.produtoId,
+        nome: itens.nome,
+        ordem: itens.ordem,
+        secao_id: itens.secao.id,
+        secao_tipo: itens.secao.tipo,
+        secao_ordem: itens.secao.ordem,
+        secao_nome: itens.secao.nome
+       
+      })
+      .onConflict('id_aula_cademi')
+      .merge(['nome', 'ordem','secao_tipo','secao_ordem','secao_nome'])
+  
+      resposta.push([classAtualization.command,classAtualization.rowCount])
+
+    }
+    }
+
+    return res.status(200).json(resposta.length + ' aulas Atualizadas')
+  } catch (error) {
+    return console.log(error);
+  }
+}
+
 
 
 
 
 
 module.exports = {
-  productAtualization
+  productAtualization,
+  classAtualization
 }
