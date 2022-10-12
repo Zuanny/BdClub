@@ -25,7 +25,7 @@ create table usuario_produtos (
 id serial primary key,
 id_usuario_cademi int REFERENCES usuario(id_usuario_cademi),
 id_produto_cademi int REFERENCES produto(id_produto_cademi),
-duracao varchar(255),
+duracao_total varchar(255),
 duracao_tipo varchar(255),
 comecou_em date,
 encerra_em date,
