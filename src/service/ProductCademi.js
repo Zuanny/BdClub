@@ -3,8 +3,6 @@ const utils = require('../utils')
 const ServiceDatabase = require('../service/UserDatabase')
 
 
-
-
 let getAllProductsCademi = async()=>{
 
   try {
@@ -61,21 +59,22 @@ let getAllClassCademiById = async ()=>{
 
   try {
     let productIds = await ServiceDatabase.getAllIdCademiProduct();
-    let aulas = []
+    let aulasAssistidas = []
     
     for(itens of productIds){
+      // console.log(itens);
       let aula = await axios.get(`/item/lista_por_produto/${itens.id_produto_cademi}`)
       if(aula.data.code = 200){
         padraoAula = {
-          produtoId : productIds[0].id_produto_cademi,
+          produtoId : itens.id_produto_cademi,
           aulas: aula.data.data.itens
         }
-        aulas.push(padraoAula)
+        aulasAssistidas.push(padraoAula)
 
       }
-    // console.log(aulas);
     }
-    return aulas
+    // console.log(aulasAssistidas);
+    return aulasAssistidas
     
   } catch (error) {
     console.log(error);

@@ -1,6 +1,4 @@
-const axios = require('../cademi/connectionAxios')
 const knex = require('../database')
-const utils = require('../utils')
 
 const getAllIdUser = async ()=>{
   try { 
@@ -14,6 +12,7 @@ const getAllIdUser = async ()=>{
 const getAllIdCademiProduct = async () => {
   try { 
     let productId = await knex('produto').select('id_produto_cademi');
+    // console.log(productId);
     return productId
   } catch (error) {
     console.log(error);
