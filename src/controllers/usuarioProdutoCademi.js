@@ -1,27 +1,26 @@
 const knex = require('../database')
-const ServiceUserProduct = require('../service/UserProductCademi')
+const UsuarioService = require('../service/UsuarioProdutoCademi')
 
 
-const userProductsAtualization = async (req , res) => {
+const usuarioProdutosAtualizacao = async (req , res) => {
   
-  let usersProducts = await ServiceUserProduct.getAllUserProductById()
-  if(!usersProducts){
+  let usuarioProdutos = await UsuarioService.obterTodosUsuarioProdutosById()
+  if(!usuarioProdutos){
     return res.status(400).json({menssagem: "Erro ao capturar dados da base do Cademi"})
   }
-  let  usersAtualizationList = []
+  let  listaUsuariosAtualizados = []
   try {
-    for (usuario of usersProducts) {
+    for (usuario of usuarioProdutos) {
       for(produto of usuario.produtos){
 
         let existTabela = await knex('usuario_produtos')
-                                .where({
-                                        id_usuario_cademi:usuario.id,
-                                        id_produto_cademi: produto.produto.id
-                                      })
-                                .first();
+                          .where({
+                            id_usuario_cademi:usuario.id,
+                            id_produto_cademi: produto.produto.id
+                          }).first();
                                 
         if(existTabela) {
-          let usersAtualization = await knex('usuario_produtos') .where({
+          let usuarioAtualizacao = await knex('usuario_produtos') .where({
             id_usuario_cademi:usuario.id,
             id_produto_cademi: produto.produto.id
           }).update({
@@ -33,11 +32,11 @@ const userProductsAtualization = async (req , res) => {
              encerra_em: produto.encerra_em,
              encerrado: produto.encerrado
                               })
-           usersAtualizationList.push([usersAtualization.command,usersAtualization.rowCount])
+                              listaUsuariosAtualizados.push([usuarioAtualizacao.command,usuarioAtualizacao.rowCount])
 
         }else{
           
-          let usersAtualization = await knex('usuario_produtos')
+          let usuarioAtualizacao = await knex('usuario_produtos')
           .insert({
             id_usuario_cademi: usuario.id,
             id_produto_cademi: produto.produto.id,
@@ -47,13 +46,11 @@ const userProductsAtualization = async (req , res) => {
             encerra_em: produto.encerra_em,
             encerrado: produto.encerrado
           })
-          // .onConflict(['id_usuario_cademi', 'id_produto_cademi'])
-          // .merge(['duracao_total', 'duracao_tipo', 'comecou_em','encerra_em','encerrado'])
-               usersAtualizationList.push([usersAtualization.command,usersAtualization.rowCount])
+          listaUsuariosAtualizados.push([usuarioAtualizacao.command,usuarioAtualizacao.rowCount])
         }
       }
     }
-    return res.status(200).json(usersAtualizationList.length)
+    return res.status(200).json(listaUsuariosAtualizados.length)
   } catch (error) {
     console.log(error);
     res.status(500).json({menssagem: "Erro ao salvar no banco de dados"})
@@ -65,7 +62,8 @@ const atualizarUsuarioProdutosPorUltimoAcesso = async (req , res) => {
   
   let {ultimo_acesso} = req.query
   ultimo_acesso ? ultimo_acesso : null
-  let idsUsuarioEProdutos = await ServiceUserProduct.obterTodosUsuarioProdutosDetalhes(ultimo_acesso)
+
+  let idsUsuarioEProdutos = await UsuarioService.obterTodosUsuarioProdutosDetalhes(ultimo_acesso)
   
   if(!idsUsuarioEProdutos){
     return res.status(400).json({menssagem: "Erro ao capturar dados da base do Cademi"})
@@ -123,6 +121,6 @@ const atualizarUsuarioProdutosPorUltimoAcesso = async (req , res) => {
 
 
 module.exports = {
-  userProductsAtualization,
+  usuarioProdutosAtualizacao,
   atualizarUsuarioProdutosPorUltimoAcesso
 }

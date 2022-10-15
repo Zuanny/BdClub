@@ -4,9 +4,9 @@ const app = express()
 
 
 const cors = require('cors')
-const userCademi = require('./router/userCademi')
-const produtoCademi = require('./router/productCademi')
-const useuarioProdutoCademi = require('./router/usersProductCademi')
+const usuarioCademi = require('./router/usuarioCademi')
+const produtoCademi = require('./router/produtoCademi')
+const usuarioProdutoCademi = require('./router/usuarioProdutoCademi')
 
 
 const corsOptions = {
@@ -16,9 +16,9 @@ const corsOptions = {
 app.use(express.json())
 app.use(cors(corsOptions));
 
-app.use('/usuariosCademi',userCademi )
+app.use('/usuariosCademi',usuarioCademi )
 app.use('/produtosCademi',produtoCademi )
-app.use('/usuarioProdutosCademi',useuarioProdutoCademi )
+app.use('/usuarioProdutosCademi',usuarioProdutoCademi )
 
 
 app.listen(process.env.PORT || '3000')

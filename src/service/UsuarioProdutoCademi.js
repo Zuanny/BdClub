@@ -1,21 +1,21 @@
 const axios = require('../cademi/connectionAxios')
-const ServiceDatabase = require('../service/Database')
+const ServiceDatabase = require('./Database')
 const knex = require('../database')
 
-let getAllUserProductById = async()=>{
+let obterTodosUsuarioProdutosById = async()=>{
 
   try {
-    let usersId = await ServiceDatabase.getAllIdUser()
+    let idUsuarios = await ServiceDatabase.obterTodosIdUsuario()
     let usuariosProdutos = []
-    for(id of usersId){
-          let userProductCademi = await axios.get(`/usuario/acesso/${id.id_usuario_cademi}`)
-          if(userProductCademi.status == 200){
-              let usuario = {
-                    id: userProductCademi.data.data.usuario.id,
-                    produtos: userProductCademi.data.data.acesso
-              }
-              usuariosProdutos.push(usuario)
-          } 
+    for(let id of idUsuarios){
+      let usuarioProdutoCademi = await axios.get(`/usuario/acesso/${id.id_usuario_cademi}`)
+      if(usuarioProdutoCademi.status == 200){
+        let usuario = {
+          id: usuarioProdutoCademi.data.data.usuario.id,
+          produtos: usuarioProdutoCademi.data.data.acesso
+        }
+        usuariosProdutos.push(usuario)
+      } 
     }
     return usuariosProdutos
   } catch (error) {
@@ -70,18 +70,15 @@ let obterTodosUsuarioProdutosDetalhes = async (ultimo_acesso = null) => {
             
           atualizacao.produtoAulas.push([atualizarAula.command, atualizarAula.rowCount ])
         }
-      }
-                
-    
+      }        
     } catch (error) {
-      // console.log(error);
-      
+      // console.log(error); 
     }
   }
   return resposta
 }
 
 module.exports = {
-  getAllUserProductById,
+  obterTodosUsuarioProdutosById,
   obterTodosUsuarioProdutosDetalhes
 }
