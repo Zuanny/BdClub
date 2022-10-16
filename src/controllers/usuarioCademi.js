@@ -1,4 +1,3 @@
-const knex = require('../database')
 const axios = require('../cademi/connectionAxios')
 const {obterTodosUsuariosCademi} = require ('../service/UsuarioCademi.js')
 const {modelarUsuario} = require('../utils')
