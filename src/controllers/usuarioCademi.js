@@ -1,6 +1,8 @@
 const knex = require('../database')
 const axios = require('../cademi/connectionAxios')
 const {obterTodosUsuariosCademi} = require ('../service/UsuarioCademi.js')
+const {modelarUsuario} = require('../utils')
+const {inserirUsuario} = require('../service/Database')
 
 const listaUsuarios = async (req , res) => {
   try {
@@ -12,7 +14,6 @@ const listaUsuarios = async (req , res) => {
 }
 
 const usuarioAtualizacao = async (req , res) => {
-  
   let usuarios = await obterTodosUsuariosCademi()
   if(!usuarios){
     return res.status(400).json({menssagem: "Erro ao capturar dados da base do Cademi"})
@@ -21,32 +22,15 @@ const usuarioAtualizacao = async (req , res) => {
   try {
     for (let usuario of usuarios) {
       if(usuario.id){
-        let usersAtualization = await knex('usuario')
-        .insert({
-          id_usuario_cademi: usuario.id,
-          nome: usuario.nome,
-          email: usuario.email,
-          celular: usuario.celular,
-          login_auto: usuario.login_auto,
-          gratis: usuario.gratis,
-          criado_em: usuario.criado_em,
-          ultimo_acesso_em: usuario.ultimo_acesso_em,
-        })
-        .onConflict('id_usuario_cademi')
-        .merge(['ultimo_acesso_em', 'celular', 'email'])
-    
-        listaAtualizacaoUsuarios.push([usersAtualization.command,usersAtualization.rowCount])
+        let usuarioModelo = modelarUsuario(usuario)
+        let usuarioAtualizado = await inserirUsuario(usuarioModelo)
+        listaAtualizacaoUsuarios.push(usuarioAtualizado)
       }
-      
     }
-   
     return res.status(200).json(`Foram atualizados ${listaAtualizacaoUsuarios.length}`)
   } catch (error) {
     res.status(500).json({menssagem: "Erro ao salvar no banco de dados"})
   }
-
-  
-
 }
 
 const ListaAcessoUsuario = async (req, res) => {

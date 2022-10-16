@@ -24,9 +24,9 @@ const obterTodosIdsUsuarioProdutosPorUltimoAcesso = async (ultimoAcesso = null) 
     let idProduto
     if (ultimoAcesso) {
       idProduto = await knex.select(['usuario_produtos.id_produto_cademi', 'usuario_produtos.id_usuario_cademi'])
-                             .from('usuario_produtos')
-                             .innerJoin('usuario','usuario.id_usuario_cademi','=','usuario_produtos.id_usuario_cademi')
-                             .where('usuario.ultimo_acesso_em','>',ultimoAcesso )
+      .from('usuario_produtos')
+      .innerJoin('usuario','usuario.id_usuario_cademi','=','usuario_produtos.id_usuario_cademi')
+      .where('usuario.ultimo_acesso_em','>',ultimoAcesso )
       return idProduto
     }
     idProduto = await knex('usuario_produtos').select(['id_produto_cademi', 'id_usuario_cademi'])
@@ -38,8 +38,83 @@ const obterTodosIdsUsuarioProdutosPorUltimoAcesso = async (ultimoAcesso = null) 
 }
 
 
+const inserirProdutoCademi = async (produto)=>{
+  let produtoAtualizacao = await knex('produto')
+        .insert(produto)
+        .onConflict('id_produto_cademi')
+        .merge(['oferta_url', 'ordem'])
+  return [produtoAtualizacao.command,produtoAtualizacao.rowCount]
+}
+
+const inserirAulaCademi = async (aula)=>{
+  let aulaAtualizadas = await knex('aulas')
+  .insert(aula)
+  .onConflict('id_aula_cademi')
+  .merge(['id_produto_cademi','nome', 'ordem','secao_tipo','secao_ordem','secao_nome'])
+  return [aulaAtualizadas.command,aulaAtualizadas.rowCount]
+}
+
+const inserirUsuario = async (usuario)=>{
+  let usuarioAtualizado = await knex('usuario')
+  .insert(usuario)
+  .onConflict('id_usuario_cademi')
+  .merge(['ultimo_acesso_em', 'celular', 'email'])
+
+  return [usuarioAtualizado.command,usuarioAtualizado.rowCount]
+}
+
+
+const existeUsuarioProduto = async (id_usuario_cademi, id_produto_cademi) => {
+  let existTabela = await knex('usuario_produtos').where({id_usuario_cademi, id_produto_cademi}).first();
+  return existTabela
+}
+
+const existeUsuarioAula = async (id_usuario_cademi, id_aula_cademi) => {
+  let existTabela = await knex('usuario_aulas').where({id_usuario_cademi, id_aula_cademi}).first();
+  return existTabela
+}
+
+const atualizarUsuarioProduto = async (id_usuario_cademi, id_produto_cademi,produto) =>{
+
+  let usuarioAtualizacao = await knex('usuario_produtos')
+  .where({ id_usuario_cademi, id_produto_cademi})
+  .update(produto)
+
+  return [usuarioAtualizacao.command,usuarioAtualizacao.rowCount];
+}
+
+const atualizarUsuarioAula = async (id_usuario_cademi, id_aula_cademi, aula) =>{
+
+  let usuarioAtualizacao = await knex('usuario_aulas')
+  .where({ id_usuario_cademi, id_aula_cademi})
+  .update(aula)
+
+  return [usuarioAtualizacao.command,usuarioAtualizacao.rowCount];
+}
+
+const inserirUsuarioProduto = async(usuarioProduto)=>{
+  let usuarioAtualizacao = await knex('usuario_produtos').insert(usuarioProduto)
+  return usuarioAtualizacao
+}
+
+const inserirUsuarioAula = async (usuarioAula) =>{
+  let atualizarAula = await knex('usuario_aulas').insert(usuarioAula)
+  return [atualizarAula.command, atualizarAula.rowCount ]
+}
+
+
+
 module.exports = {
   obterTodosIdUsuario,
   obterTodosIdsProdutoCademi,
-  obterTodosIdsUsuarioProdutosPorUltimoAcesso
+  obterTodosIdsUsuarioProdutosPorUltimoAcesso,
+  inserirProdutoCademi,
+  inserirAulaCademi,
+  inserirUsuario,
+  existeUsuarioProduto,
+  atualizarUsuarioProduto,
+  inserirUsuarioProduto,
+  existeUsuarioAula,
+  atualizarUsuarioAula,
+  inserirUsuarioAula
 }

@@ -1,9 +1,9 @@
-const knex = require('../database')
 const UsuarioService = require('../service/UsuarioProdutoCademi')
+const {existeUsuarioProduto, atualizarUsuarioProduto, inserirUsuarioProduto,existeUsuarioAula, atualizarUsuarioAula, inserirUsuarioAula} = require('../service/Database')
+const {modelarUsuarioProduto, modelarUsuarioProdutoByAula, modelarUsuarioAula}= require('../utils')
 
 
 const usuarioProdutosAtualizacao = async (req , res) => {
-  
   let usuarioProdutos = await UsuarioService.obterTodosUsuarioProdutosById()
   if(!usuarioProdutos){
     return res.status(400).json({menssagem: "Erro ao capturar dados da base do Cademi"})
@@ -12,45 +12,21 @@ const usuarioProdutosAtualizacao = async (req , res) => {
   try {
     for (usuario of usuarioProdutos) {
       for(produto of usuario.produtos){
-
-        let existTabela = await knex('usuario_produtos')
-                          .where({
-                            id_usuario_cademi:usuario.id,
-                            id_produto_cademi: produto.produto.id
-                          }).first();
-                                
+        let existTabela = await existeUsuarioProduto(usuario.id, produto.produto.id)
         if(existTabela) {
-          let usuarioAtualizacao = await knex('usuario_produtos') .where({
-            id_usuario_cademi:usuario.id,
-            id_produto_cademi: produto.produto.id
-          }).update({
-             id_usuario_cademi: usuario.id,
-             id_produto_cademi: produto.produto.id,
-             duracao_total: produto.duracao,
-             duracao_tipo: produto.duracao_tipo,
-             comecou_em: produto.comecou_em,
-             encerra_em: produto.encerra_em,
-             encerrado: produto.encerrado
-                              })
-                              listaUsuariosAtualizados.push([usuarioAtualizacao.command,usuarioAtualizacao.rowCount])
-
+          produto.id = produto.produto.id
+          let usuarioProduto = modelarUsuarioProduto(produto, usuario)
+          let usuarioAtualizado = await atualizarUsuarioProduto(usuario.id, produto.id, usuarioProduto)
+          listaUsuariosAtualizados.push(usuarioAtualizado)
         }else{
-          
-          let usuarioAtualizacao = await knex('usuario_produtos')
-          .insert({
-            id_usuario_cademi: usuario.id,
-            id_produto_cademi: produto.produto.id,
-            duracao_total: produto.duracao,
-            duracao_tipo: produto.duracao_tipo,
-            comecou_em: produto.comecou_em,
-            encerra_em: produto.encerra_em,
-            encerrado: produto.encerrado
-          })
-          listaUsuariosAtualizados.push([usuarioAtualizacao.command,usuarioAtualizacao.rowCount])
+          produto.id = produto.produto.id
+          let usuarioProduto = modelarUsuarioProduto(produto, usuario)
+          let usuarioProdutoAtualizado = await inserirUsuarioProduto(usuarioProduto)
+          listaUsuariosAtualizados.push(usuarioProdutoAtualizado)
         }
       }
     }
-    return res.status(200).json(listaUsuariosAtualizados.length)
+    return res.status(200).json({menssagem:'foram atualizadas' + listaUsuariosAtualizados.length})
   } catch (error) {
     console.log(error);
     res.status(500).json({menssagem: "Erro ao salvar no banco de dados"})
@@ -72,40 +48,22 @@ const atualizarUsuarioProdutosPorUltimoAcesso = async (req , res) => {
   let atualizacao = {}
   try {
     for (ids of idsUsuarioEProdutos) {
-          let atualizacaoProdutos = await knex('usuario_produtos') .where({
-            id_usuario_cademi:ids.idUsuario,
-            id_produto_cademi: ids.idProduto
-          }).update({
-             porcentagem_aulas: ids.respAxios.total,
-             aulas_assistidas: ids.respAxios.assistidas,
-             aulas_completas: ids.respAxios.completas,
-          })
-
-          atualizacao.produtoComando = atualizacaoProdutos.command
-          atualizacao.produtoCount = atualizacaoProdutos.rowCount
-          atualizacao.produtoAulas = []
+      let usuarioProdutoModeloByAula = modelarUsuarioProdutoByAula(ids.respAxios)
+      let atualizacaoProdutos = await atualizarUsuarioProduto(ids.idUsuario, ids.idProduto, usuarioProdutoModeloByAula)
+      atualizacao.produtoComando = atualizacaoProdutos.command
+      atualizacao.produtoCount = atualizacaoProdutos.rowCount
+      atualizacao.produtoAulas = []
           
       for(aula of ids.respAxios.aulas){
-        let existeAulas = await knex('usuario_aulas').where({
-          id_aula_cademi:aula.item_id,
-          id_usuario_cademi:ids.idUsuario
-        }).first()
+        let existeAulas = await existeUsuarioAula(ids.idUsuario, aula.item_id)
         if(existeAulas){
-          let atualizarAula = await knex('usuario_aulas').where({
-              id_aula_cademi:aula.item_id,
-              id_usuario_cademi:ids.idUsuario
-            }).update({ acesso_em:aula.acesso_em, count: aula.ordem })
-
-            atualizacao.produtoAulas.push([atualizarAula.command, atualizarAula.rowCount ])
+          let modeloUsuarioAula = modelarUsuarioAula(ids.idUsuario, aula)
+          let atualizarAula = await atualizarUsuarioAula(ids.idUsuario,aula.item_id, modeloUsuarioAula )
+          atualizacao.produtoAulas.push(atualizarAula)
         }else{
-          let atualizarAula = await knex('usuario_aulas').insert({
-            id_aula_cademi: aula.item_id,
-            id_usuario_cademi: ids.idUsuario,
-            acesso_em: aula.acesso_em,
-            count: aula.ordem
-          })
-
-          atualizacao.produtoAulas.push([atualizarAula.command, atualizarAula.rowCount ])
+          let modeloUsuarioAula = modelarUsuarioAula(ids.idUsuario, aula)
+          let aulaAtualizada = await inserirUsuarioAula(modeloUsuarioAula)
+          atualizacao.produtoAulas.push(aulaAtualizada)
         }
       }
       listaAtualizados.push(atualizacao)
