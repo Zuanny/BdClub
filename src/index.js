@@ -7,10 +7,11 @@ const cors = require('cors')
 const usuarioCademi = require('./router/usuarioCademi')
 const produtoCademi = require('./router/produtoCademi')
 const usuarioProdutoCademi = require('./router/usuarioProdutoCademi')
+const test = require('./controllers/test')
 
 
 const corsOptions = {
-    exposedHeaders: ["x-access-token"],
+    exposedHeaders: ["Authorization"],
   };
   
 app.use(express.json())
@@ -19,6 +20,7 @@ app.use(cors(corsOptions));
 app.use('/usuariosCademi',usuarioCademi )
 app.use('/produtosCademi',produtoCademi )
 app.use('/usuarioProdutosCademi',usuarioProdutoCademi )
+app.post('/teste',test.teste )
 
 
 app.listen(process.env.PORT || '3000')

@@ -102,8 +102,38 @@ const inserirUsuarioAula = async (usuarioAula) =>{
   return [atualizarAula.command, atualizarAula.rowCount ]
 }
 
+const obterRdToken = async ()=>{
+  let token = await knex('rdtoken').select('access_token').where('id', 1).first()
+  return token
+}
 
+const obterRdRefreshTokens = async ()=>{
+  let token = await knex('rdtoken').select('refresh_token').where('id', 1).first()
+  return token
+}
 
+const atualiarRdToken = async (token)=>{
+  await knex('rdtoken').where('id',1).update(token)
+  return
+}
+
+const obterUsuarioByEmail = async(email)=>{
+try {
+  let usuario = await knex('usuario').select(knex.raw(" *, to_date(ultimo_acesso_em, 'yyyy-mm-dd') , to_char((now() - to_date(ultimo_acesso_em, 'yyyy-mm-dd')), 'dd') as dataPassada")).where({email}).first()
+  return usuario
+} catch (error) {
+  console.log(error);
+}}
+
+const obterTodosUsuariosEmailComUltimoAcesso = async () =>{
+  try {
+    let usuario = await knex('usuario').select('*');
+    return usuario
+  } catch (error) {
+    console.log(error);
+  }
+
+}
 module.exports = {
   obterTodosIdUsuario,
   obterTodosIdsProdutoCademi,
@@ -116,5 +146,10 @@ module.exports = {
   inserirUsuarioProduto,
   existeUsuarioAula,
   atualizarUsuarioAula,
-  inserirUsuarioAula
+  inserirUsuarioAula,
+  obterRdToken,
+  obterRdRefreshTokens,
+  obterUsuarioByEmail,
+  atualiarRdToken,
+  obterTodosUsuariosEmailComUltimoAcesso
 }

@@ -57,3 +57,9 @@ acesso_em text,
 count int
 )
 
+create table rdtoken(
+id serial primary key,
+access_token text,
+refresh_token text
+)
+
