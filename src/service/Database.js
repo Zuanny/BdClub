@@ -23,15 +23,22 @@ const obterTodosIdsUsuarioProdutosPorUltimoAcesso = async (ultimoAcesso = null) 
   try { 
     let idProduto
     if (ultimoAcesso) {
-      idProduto = await knex.select(['usuario_produtos.id_produto_cademi', 'usuario_produtos.id_usuario_cademi'])
-      .from('usuario_produtos')
-      .innerJoin('usuario','usuario.id_usuario_cademi','=','usuario_produtos.id_usuario_cademi')
-      .where('usuario.ultimo_acesso_em','>',ultimoAcesso )
-      return idProduto
+      idProduto = await knex.raw(`select up.id_usuario_cademi, up.id_produto_cademi 
+      from usuario_produtos up 
+      inner join usuario u on u.id_usuario_cademi = up.id_usuario_cademi 
+      where up.id_produto_cademi = (select id_produto_cademi from produto p 
+                      where p.vitrine_nome ilike '%Planejamento mensal%' 
+                      order by id_produto_cademi desc limit 1)
+      and u.ultimo_acesso_em > ?`, [ultimoAcesso])
+      return idProduto.rows
     }
-    idProduto = await knex('usuario_produtos').select(['id_produto_cademi', 'id_usuario_cademi'])
-    return idProduto
-    
+
+    idProduto = await knex.raw(`select up.id_usuario_cademi, up.id_produto_cademi from usuario_produtos up 
+    where up.id_produto_cademi = (select id_produto_cademi from produto p 
+                    where p.vitrine_nome ilike '%Planejamento mensal%' 
+                    order by id_produto_cademi desc limit 1)`)
+
+    return idProduto.rows
   } catch (error) {
     console.log(error);
   }
@@ -127,7 +134,8 @@ try {
 
 const obterTodosUsuariosEmailComUltimoAcesso = async () =>{
   try {
-    let usuario = await knex('usuario').select('*');
+    let usuario = await knex('usuario').select(knex.raw(" email, to_date(ultimo_acesso_em, 'yyyy-mm-dd') , to_char((now() - to_date(ultimo_acesso_em, 'yyyy-mm-dd')), 'dd') as dataPassada")).whereNotNull('ultimo_acesso_em');
+    
     return usuario
   } catch (error) {
     console.log(error);
