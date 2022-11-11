@@ -7,6 +7,7 @@ const cors = require('cors')
 const usuarioCademi = require('./router/usuarioCademi')
 const produtoCademi = require('./router/produtoCademi')
 const usuarioProdutoCademi = require('./router/usuarioProdutoCademi')
+const integracoesRd = require('./router/integracoes')
 const test = require('./controllers/test')
 
 
@@ -20,6 +21,7 @@ app.use(cors(corsOptions));
 app.use('/usuariosCademi',usuarioCademi )
 app.use('/produtosCademi',produtoCademi )
 app.use('/usuarioProdutosCademi',usuarioProdutoCademi )
+app.use('/rd',integracoesRd )
 app.post('/teste',test.teste )
 
 
